@@ -1,0 +1,29 @@
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+backend/.venv/
+
+# Environment
+.env
+.env.local
+
+# SQLite
+backend/database/sentinel.db
+
+# ML artifacts
+backend/models/*.pkl
+
+# Logs
+*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
