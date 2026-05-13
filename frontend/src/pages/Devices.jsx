@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import HUDCard from '../components/ui/HUDCard'
 import MiniSparkline from '../components/ui/MiniSparkline'
 import { useDevices } from '../hooks/useDevices'
+import { useResponseActions } from '../hooks/useResponseActions'
 
 const levelClass = {
   CLEAN: 'border-tron-cyan-dim text-tron-cyan-dim',
@@ -17,6 +18,7 @@ const sensorClass = {
 
 export default function Devices() {
   const { devices } = useDevices()
+  const { deviceActiveCounts } = useResponseActions()
 
   return (
     <div className="space-y-4">
@@ -43,6 +45,14 @@ export default function Devices() {
               <span className={`border px-2 py-1 text-[10px] uppercase tracking-[0.15em] ${levelClass[d.threatLevel]}`}>
                 {d.threatLevel}
               </span>
+              {deviceActiveCounts[d.id] ? (
+                <Link
+                  to={`/response-actions?device=${encodeURIComponent(d.name)}&status=active`}
+                  className="border border-tron-cyan px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-tron-cyan hover:bg-tron-cyan/10"
+                >
+                  ACTIONS ACTIVE: {deviceActiveCounts[d.id]}
+                </Link>
+              ) : null}
               <Link to={`/devices/${d.id}`} className="border border-tron-cyan px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-tron-cyan hover:bg-tron-cyan/10">
                 DRILL DOWN {'=>'}
               </Link>

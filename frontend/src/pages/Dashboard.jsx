@@ -4,6 +4,7 @@ import HUDCard from '../components/ui/HUDCard'
 import SeverityBadge from '../components/ui/SeverityBadge'
 import ThreatGauge from '../components/ui/ThreatGauge'
 import { alertFeed, anomalyTimeline, dashboardMetrics } from '../data/mockData'
+import { useResponseActions } from '../hooks/useResponseActions'
 
 function Counter({ value, suffix = '' }) {
   const [v, setV] = useState(0)
@@ -29,10 +30,13 @@ function Counter({ value, suffix = '' }) {
 }
 
 export default function Dashboard() {
+  const { activeEnforcedCount } = useResponseActions()
+  const metrics = [...dashboardMetrics, { key: 'activeActions', label: 'Active Enforced Actions', value: activeEnforcedCount, suffix: '' }]
+
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {dashboardMetrics.map((m) => (
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {metrics.map((m) => (
           <HUDCard key={m.key} title={m.label}>
             <p className="font-display text-3xl text-tron-text-bright">
               <Counter value={m.value} suffix={m.suffix} />

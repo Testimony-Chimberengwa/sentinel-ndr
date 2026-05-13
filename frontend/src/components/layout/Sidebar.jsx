@@ -1,10 +1,11 @@
-import { Activity, Bell, Cpu, Gauge, Radar, Settings } from 'lucide-react'
+import { Activity, Bell, Cpu, Gauge, Radar, Settings, ShieldCheck } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const nav = [
   { to: '/dashboard', label: 'Dashboard', icon: Gauge },
   { to: '/devices', label: 'Devices', icon: Cpu },
   { to: '/alerts', label: 'Alerts', icon: Bell },
+  { to: '/response-actions', label: 'Response', icon: ShieldCheck },
   { to: '/threats', label: 'Threats', icon: Radar },
   { to: '/baseline', label: 'Baseline', icon: Activity },
   { to: '/settings', label: 'Settings', icon: Settings },

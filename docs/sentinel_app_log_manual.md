@@ -36,6 +36,15 @@ Use this file as the source of truth when changing the app:
 - Committed the current UI state to Git after the review-driven revert.
 - Replaced the default browser favicon with a custom Sentinel shield icon in `frontend/public/favicon.svg`.
 - Kept the favicon simple and high-contrast so it reads clearly in browser tabs and shortcuts.
+- Added a full response action lifecycle feature with new page `frontend/src/pages/ResponseActions.jsx` at route `/response-actions`.
+- Added shared lifecycle state provider in `frontend/src/context/ResponseActionsContext.jsx` and hook `frontend/src/hooks/useResponseActions.js`.
+- Added top-level route integration in `frontend/src/App.jsx` and provider wiring in `frontend/src/main.jsx`.
+- Added sidebar navigation link for Response Centre in `frontend/src/components/layout/Sidebar.jsx`.
+- Integrated `frontend/src/components/alerts/RemediationCentre.jsx` so `QUARANTINE NOW` and `BLOCK IP` create `PENDING` actions and redirect to `/response-actions`.
+- Integrated `frontend/src/pages/AlertDetail.jsx` to pass alert/device context into remediation actions.
+- Integrated `frontend/src/pages/Devices.jsx` to show `ACTIONS ACTIVE: N` badges per device with links to filtered response actions.
+- Integrated `frontend/src/pages/Dashboard.jsx` with a fifth metric card: `Active Enforced Actions`.
+- Added action history CSV export, reversal confirmation modal with required reason, extend-by-24h handling, and automatic expiry state handling.
 
 ## Change Log Template
 

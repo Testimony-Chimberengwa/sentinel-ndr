@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getRemediationActions, initialRemediationLog } from '../../data/mockData'
+import { useResponseActions } from '../../hooks/useResponseActions'
 
 const toneClass = {
   red: 'border-tron-red text-tron-red hover:bg-tron-red/10',
@@ -7,13 +9,49 @@ const toneClass = {
   cyan: 'border-tron-cyan text-tron-cyan hover:bg-tron-cyan/10',
 }
 
-export default function RemediationCentre({ attackType }) {
+export default function RemediationCentre({ attackType, alertId, deviceId, deviceName, deviceIp }) {
   const actions = useMemo(() => getRemediationActions(attackType), [attackType])
-  const [log, setLog] = useState(initialRemediationLog)
+  const navigate = useNavigate()
+  const { remediationLogs, appendRemediationLog, queuePendingAction } = useResponseActions()
+  const log = remediationLogs[alertId] || initialRemediationLog
 
   const appendLog = (actionName) => {
     const ts = new Date().toISOString().replace('T', ' ').slice(0, 16)
-    setLog((prev) => [`[${ts}] SENTINEL > Action executed: ${actionName}`, ...prev])
+    appendRemediationLog(alertId, `[${ts}] SENTINEL > Action executed: ${actionName}`)
+  }
+
+  const queueLifecycleAction = (buttonLabel) => {
+    const now = Date.now()
+
+    if (buttonLabel === 'QUARANTINE NOW') {
+      queuePendingAction({
+        category: 'DEVICE',
+        actionType: 'DEVICE QUARANTINE',
+        targetDeviceId: deviceId,
+        targetDeviceName: deviceName,
+        targetIp: deviceIp,
+        scope: 'ALL TRAFFIC',
+        triggeredByAlert: alertId,
+        initiatedBy: 'ANALYST',
+        expiresAt: new Date(now + 24 * 60 * 60 * 1000).toISOString(),
+      })
+      navigate(`/response-actions?status=pending&device=${encodeURIComponent(deviceName)}`)
+    }
+
+    if (buttonLabel === 'BLOCK IP') {
+      queuePendingAction({
+        category: 'NETWORK',
+        actionType: 'IP BLOCK',
+        targetDescriptor: '41.215.88.34',
+        targetDeviceId: deviceId,
+        targetDeviceName: deviceName,
+        targetIp: deviceIp,
+        scope: 'SPECIFIC IP',
+        triggeredByAlert: alertId,
+        initiatedBy: 'ANALYST',
+      })
+      navigate(`/response-actions?status=pending&device=${encodeURIComponent(deviceName)}`)
+    }
   }
 
   return (
@@ -35,7 +73,10 @@ export default function RemediationCentre({ attackType }) {
             <button
               type="button"
               className={`mt-4 border px-4 py-2 text-xs uppercase tracking-[0.2em] ${toneClass[action.tone]}`}
-              onClick={() => appendLog(action.name)}
+              onClick={() => {
+                appendLog(action.name)
+                queueLifecycleAction(action.button)
+              }}
             >
               {action.button}
             </button>

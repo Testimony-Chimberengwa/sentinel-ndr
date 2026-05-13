@@ -7,6 +7,7 @@ import Baseline from './pages/Baseline'
 import Dashboard from './pages/Dashboard'
 import DeviceDrillDown from './pages/DeviceDrillDown'
 import Devices from './pages/Devices'
+import ResponseActions from './pages/ResponseActions'
 import Settings from './pages/Settings'
 import Threats from './pages/Threats'
 
@@ -24,6 +25,7 @@ function App() {
             <Route path="/devices/:deviceId" element={<DeviceDrillDown />} />
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/alerts/:alertId" element={<AlertDetail />} />
+            <Route path="/response-actions" element={<ResponseActions />} />
             <Route path="/threats" element={<Threats />} />
             <Route path="/baseline" element={<Baseline />} />
             <Route path="/settings" element={<Settings />} />

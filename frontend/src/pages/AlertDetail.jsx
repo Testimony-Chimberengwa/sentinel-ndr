@@ -60,7 +60,13 @@ export default function AlertDetail() {
         <TrafficScatter data={evidenceTraffic} />
       </HUDCard>
 
-      <RemediationCentre attackType={alert.attackType} />
+      <RemediationCentre
+        attackType={alert.attackType}
+        alertId={alert.id}
+        deviceId={device.id}
+        deviceName={device.name}
+        deviceIp={device.ip}
+      />
     </div>
   )
 }
