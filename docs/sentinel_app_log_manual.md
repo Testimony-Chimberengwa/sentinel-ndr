@@ -4,9 +4,11 @@ This file is the working log, feature history, and usage guide for the Sentinel 
 
 Use this file as the source of truth when changing the app:
 - Before adding or removing a feature, update this file first or in the same change.
+- Before changing even a single line of code, update this file in the same work.
 - Record what changed, where it changed, and why it changed.
 - Keep the log concise, factual, and current.
 - If a feature is reverted, remove or mark the previous note so the history stays accurate.
+- Any Copilot or AI-assisted edit should treat this file as mandatory context and must update it whenever it writes code, no matter how small the edit is.
 
 ## Current Product Direction
 
