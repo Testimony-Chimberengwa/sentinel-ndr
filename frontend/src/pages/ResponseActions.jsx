@@ -180,6 +180,10 @@ export default function ResponseActions() {
               const elapsedMs = now - started
               const expiryMs = action.expiresAt ? new Date(action.expiresAt).getTime() - now : null
               const dangerExpiry = expiryMs !== null && expiryMs <= 60 * 60 * 1000
+              const deviceQuarantined = actions.some(
+                (a) =>
+                  a.targetDeviceId === action.targetDeviceId && a.actionType === 'DEVICE QUARANTINE' && a.status === 'ACTIVE',
+              )
 
               return (
                 <HUDCard key={action.id}>
@@ -228,6 +232,12 @@ export default function ResponseActions() {
                       </p>
                       <p className="text-xs text-tron-text">
                         Scope: <span className="text-tron-cyan">{action.scope}</span>
+                      </p>
+                      <p className="text-xs text-tron-text">
+                        Device status:{' '}
+                        <span className={deviceQuarantined ? 'text-tron-amber' : 'text-tron-cyan'}>
+                          {deviceQuarantined ? 'QUARANTINED' : 'UNQUARANTINED'}
+                        </span>
                       </p>
                     </div>
 

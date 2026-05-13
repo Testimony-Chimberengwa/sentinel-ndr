@@ -45,6 +45,7 @@ Use this file as the source of truth when changing the app:
 - Integrated `frontend/src/pages/Devices.jsx` to show `ACTIONS ACTIVE: N` badges per device with links to filtered response actions.
 - Integrated `frontend/src/pages/Dashboard.jsx` with a fifth metric card: `Active Enforced Actions`.
 - Added action history CSV export, reversal confirmation modal with required reason, extend-by-24h handling, and automatic expiry state handling.
+- Added explicit per-card device state display (`QUARANTINED` / `UNQUARANTINED`) that updates after reversal.
 
 ## Change Log Template
 
