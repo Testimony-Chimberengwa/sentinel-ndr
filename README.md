@@ -152,8 +152,11 @@ sentinel-ndr/
 │
 └── docs/
     ├── api_spec.md
-    └── lab_setup.md
+        ├── lab_setup.md
+        └── sentinel_app_log_manual.md
 ```
+
+The working app log and maintenance manual lives in [docs/sentinel_app_log_manual.md](docs/sentinel_app_log_manual.md). Update that file whenever features are added, removed, or revised.
 
 ---
 
