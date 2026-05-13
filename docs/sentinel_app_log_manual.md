@@ -34,6 +34,8 @@ Use this file as the source of truth when changing the app:
 - Updated `frontend/src/components/layout/Sidebar.jsx` with temporary collapsed GX sidebar behavior during the exploration.
 - Updated `frontend/src/components/ui/ThreatGauge.jsx` with a temporary SVG gauge experiment during the exploration.
 - Committed the current UI state to Git after the review-driven revert.
+- Replaced the default browser favicon with a custom Sentinel shield icon in `frontend/public/favicon.svg`.
+- Kept the favicon simple and high-contrast so it reads clearly in browser tabs and shortcuts.
 
 ## Change Log Template
 
