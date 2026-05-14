@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Sidebar from './components/layout/Sidebar'
 import TopNav from './components/layout/TopNav'
@@ -13,10 +14,12 @@ import Settings from './pages/Settings'
 import Threats from './pages/Threats'
 
 function App() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
   return (
     <div className="app-grid min-h-screen bg-tron-black text-tron-text">
-      <div className="mx-auto grid max-w-[1700px] lg:grid-cols-[260px_1fr]">
-        <Sidebar />
+      <div className={`mx-auto grid max-w-[1700px] ${sidebarCollapsed ? 'lg:grid-cols-[84px_1fr]' : 'lg:grid-cols-[260px_1fr]'}`}>
+        <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((current) => !current)} />
         <main className="p-4 md:p-6">
           <TopNav />
           <Routes>

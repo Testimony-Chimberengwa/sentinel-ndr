@@ -39,6 +39,7 @@ Use this file as the source of truth when changing the app:
 - Added `frontend/src/components/alerts/AlertInvestigationPanel.jsx` and `frontend/src/components/charts/PatternOfLifeHeatmap.jsx` for reusable investigation detail and heatmap display.
 - Updated `frontend/src/data/mockData.js` with richer event metadata and a 02:00-04:00 daily pattern for VM-TEST-EXFIL.
 - Built and validated the frontend after the changes.
+- Added a quick collapsible sidebar fix using hamburger/X toggle controls in `frontend/src/components/layout/Sidebar.jsx` and dynamic layout width in `frontend/src/App.jsx` to improve dashboard visibility.
 
 ### 2026-05-13
 
