@@ -40,6 +40,9 @@ Use this file as the source of truth when changing the app:
 - Updated `frontend/src/data/mockData.js` with richer event metadata and a 02:00-04:00 daily pattern for VM-TEST-EXFIL.
 - Built and validated the frontend after the changes.
 - Added a quick collapsible sidebar fix using hamburger/X toggle controls in `frontend/src/components/layout/Sidebar.jsx` and dynamic layout width in `frontend/src/App.jsx` to improve dashboard visibility.
+- Updated `frontend/src/pages/ResponseActions.jsx` so every response action card always shows side-by-side `REVERSE ACTION` and `+ EXTEND 24H` controls, with reversal confirmation dropdown reasons, reversal toast, and `RE-ENFORCE` for reversed actions.
+- Updated `frontend/src/context/ResponseActionsContext.jsx` to support minute-based extension duration, re-enforcement, and standardized timestamped reversal log entries.
+- Updated `frontend/src/pages/Devices.jsx` to reflect containment-driven threat status changes from active quarantine actions.
 
 ### 2026-05-13
 

@@ -37,8 +37,37 @@ function escapeCsv(v) {
   return `"${text.replaceAll('"', '""')}"`
 }
 
+const reversalReasons = [
+  'False positive confirmed',
+  'Investigation concluded - threat neutralised',
+  'Device needed for operations',
+  'Manual override by analyst',
+]
+
+function reversalDescription(action) {
+  if (action.actionType.includes('QUARANTINE')) {
+    return `This will lift the quarantine on ${action.targetDeviceName} and restore full network access.`
+  }
+  if (action.actionType.includes('IP BLOCK')) {
+    return `This will remove ${action.targetDescriptor || 'the destination IP'} from blocklist.`
+  }
+  if (action.actionType.includes('PATTERN OF LIFE')) {
+    return 'This will remove traffic restrictions.'
+  }
+  if (action.actionType.includes('RATE')) {
+    return 'This will restore normal connection rate.'
+  }
+  if (action.actionType.includes('DNS SINKHOLE')) {
+    return 'This will restore normal DNS resolution.'
+  }
+  if (action.actionType.includes('PACKET CAPTURE') || action.actionType.includes('CAPTURE')) {
+    return 'This will stop packet capture.'
+  }
+  return `This will undo ${action.actionType}.`
+}
+
 export default function ResponseActions() {
-  const { actions, activeEnforcedCount, reverseAction, extendAction, activatePendingAction } = useResponseActions()
+  const { actions, activeEnforcedCount, reverseAction, extendAction, activatePendingAction, reEnforceAction } = useResponseActions()
 
   const [searchParams, setSearchParams] = useSearchParams()
   const [query, setQuery] = useState(searchParams.get('device') || '')
@@ -46,7 +75,8 @@ export default function ResponseActions() {
   const [statusTab, setStatusTab] = useState(searchParams.get('status')?.toUpperCase() || 'ACTIVE')
   const [now, setNow] = useState(Date.now())
   const [reverseDraft, setReverseDraft] = useState({ actionId: null, reason: '' })
-  const [extendFlash, setExtendFlash] = useState('')
+  const [extendDraft, setExtendDraft] = useState({ actionId: null, minutes: 1440 })
+  const [toast, setToast] = useState('')
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60_000)
@@ -242,28 +272,35 @@ export default function ResponseActions() {
                     </div>
 
                     <div className="space-y-3">
-                      {action.status === 'ACTIVE' ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => setReverseDraft({ actionId: action.id, reason: '' })}
-                            className="w-full border border-tron-red px-4 py-2 text-xs uppercase tracking-[0.16em] text-tron-red hover:bg-tron-red/10"
-                          >
-                            REVERSE ACTION
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              extendAction(action.id)
-                              setExtendFlash(action.id)
-                              setTimeout(() => setExtendFlash(''), 900)
-                            }}
-                            className="w-full border border-tron-cyan px-4 py-2 text-xs uppercase tracking-[0.16em] text-tron-cyan hover:bg-tron-cyan/10"
-                          >
-                            EXTEND
-                          </button>
-                          {extendFlash === action.id ? <p className="text-right text-xs text-tron-cyan">+24h</p> : null}
-                        </>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          disabled={action.status === 'REVERSED' || action.status === 'EXPIRED'}
+                          onClick={() => setReverseDraft({ actionId: action.id, reason: '' })}
+                          className="w-full border border-tron-red px-3 py-2 text-xs uppercase tracking-[0.16em] text-tron-red shadow-glow-red hover:bg-tron-red/10 disabled:cursor-not-allowed disabled:opacity-45"
+                        >
+                          ↩ REVERSE ACTION
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setExtendDraft({ actionId: action.id, minutes: action.actionType.includes('CAPTURE') ? 60 : 1440 })}
+                          className="w-full border border-tron-cyan px-3 py-2 text-xs uppercase tracking-[0.16em] text-tron-cyan shadow-glow-cyan hover:bg-tron-cyan/10"
+                        >
+                          + EXTEND 24H
+                        </button>
+                      </div>
+
+                      {action.status === 'REVERSED' ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            reEnforceAction(action.id)
+                            setStatusTab('ACTIVE')
+                          }}
+                          className="w-full border border-tron-amber px-4 py-2 text-xs uppercase tracking-[0.16em] text-tron-amber hover:bg-tron-amber/10"
+                        >
+                          RE-ENFORCE
+                        </button>
                       ) : null}
 
                       {action.status === 'PENDING' ? (
@@ -355,16 +392,21 @@ export default function ResponseActions() {
               return (
                 <>
                   <p className="mt-3 text-sm text-tron-text">
-                    You are about to reverse: {selected.actionType} on {selected.targetDeviceName}. This will restore full network access to this device.
+                    {reversalDescription(selected)}
                   </p>
                   <label className="mt-4 block text-xs uppercase tracking-[0.16em] text-tron-cyan">
                     Reason for reversal (required)
                   </label>
-                  <textarea
+                  <select
                     value={reverseDraft.reason}
                     onChange={(e) => setReverseDraft((prev) => ({ ...prev, reason: e.target.value }))}
-                    className="mt-2 h-28 w-full border border-tron-border bg-tron-black p-3 text-sm text-tron-text"
-                  />
+                    className="hud-input mt-2 w-full"
+                  >
+                    <option value="">Select reason...</option>
+                    {reversalReasons.map((reason) => (
+                      <option key={reason} value={reason}>{reason}</option>
+                    ))}
+                  </select>
                   <div className="mt-4 flex gap-2">
                     <button
                       type="button"
@@ -373,8 +415,10 @@ export default function ResponseActions() {
                         reverseAction({ actionId: selected.id, reason: reverseDraft.reason.trim() })
                         setReverseDraft({ actionId: null, reason: '' })
                         setStatusTab('REVERSED')
+                        setToast('ACTION REVERSED')
+                        setTimeout(() => setToast(''), 2200)
                       }}
-                      className="border border-tron-red px-4 py-2 text-xs uppercase tracking-[0.16em] text-tron-red disabled:opacity-40"
+                      className="border border-tron-red px-4 py-2 text-xs uppercase tracking-[0.16em] text-tron-red shadow-glow-red disabled:opacity-40"
                     >
                       CONFIRM REVERSAL
                     </button>
@@ -390,6 +434,51 @@ export default function ResponseActions() {
               )
             })()}
           </div>
+        </div>
+      ) : null}
+
+      {extendDraft.actionId ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
+          <div className="w-full max-w-lg border border-tron-border bg-tron-panel p-5">
+            <h3 className="font-display text-xl text-tron-text-bright">EXTEND ACTION WINDOW</h3>
+            <p className="mt-3 text-sm text-tron-text">Specify extension duration in minutes.</p>
+            <label className="mt-4 block text-xs uppercase tracking-[0.16em] text-tron-cyan">Minutes</label>
+            <input
+              type="number"
+              min={1}
+              value={extendDraft.minutes}
+              onChange={(e) => setExtendDraft((prev) => ({ ...prev, minutes: Number(e.target.value || 0) }))}
+              className="hud-input mt-2 w-full"
+            />
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                disabled={!extendDraft.minutes || extendDraft.minutes < 1}
+                onClick={() => {
+                  const selected = actions.find((a) => a.id === extendDraft.actionId)
+                  if (!selected) return
+                  extendAction(selected.id, extendDraft.minutes)
+                  setExtendDraft({ actionId: null, minutes: 1440 })
+                }}
+                className="border border-tron-cyan px-4 py-2 text-xs uppercase tracking-[0.16em] text-tron-cyan shadow-glow-cyan disabled:opacity-40"
+              >
+                CONFIRM EXTEND
+              </button>
+              <button
+                type="button"
+                onClick={() => setExtendDraft({ actionId: null, minutes: 1440 })}
+                className="border border-tron-border px-4 py-2 text-xs uppercase tracking-[0.16em] text-tron-text"
+              >
+                CANCEL
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? (
+        <div className="fixed bottom-5 right-5 z-50 border border-emerald-400 bg-emerald-500/15 px-4 py-3 text-sm uppercase tracking-[0.16em] text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.45)]">
+          {toast}
         </div>
       ) : null}
     </div>

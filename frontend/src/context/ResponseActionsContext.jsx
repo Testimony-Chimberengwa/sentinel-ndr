@@ -169,7 +169,7 @@ export function ResponseActionsProvider({ children }) {
       const stamp = ts.replace('T', ' ').slice(0, 16)
       appendRemediationLog(
         source.triggeredByAlert,
-        `[${stamp}] SENTINEL > Reversal executed: ${source.actionType} on ${source.targetDeviceName}. Reason: ${reason}`,
+        `[${stamp}] REVERSAL: ${source.actionType} lifted by ${reversedBy} - Reason: ${reason}`,
       )
     }
   }, [actions, appendRemediationLog])
@@ -197,23 +197,53 @@ export function ResponseActionsProvider({ children }) {
         const stamp = ts.replace('T', ' ').slice(0, 16)
         appendRemediationLog(
           alertId,
-          `[${stamp}] SENTINEL > Reversal executed: ${source.actionType} on ${source.targetDeviceName}. Reason: ${reason}`,
+          `[${stamp}] REVERSAL: ${source.actionType} lifted by ${reversedBy} - Reason: ${reason}`,
         )
       })
     },
     [actions, appendRemediationLog],
   )
 
-  const extendAction = useCallback((actionId) => {
+  const extendAction = useCallback((actionId, minutes = 1440) => {
+    const safeMinutes = Math.max(1, Number(minutes) || 1440)
     setActions((prev) =>
       prev.map((a) => {
-        if (a.id !== actionId || a.status !== 'ACTIVE') {
+        if (a.id !== actionId) {
           return a
         }
         const baseTs = a.expiresAt ? new Date(a.expiresAt).getTime() : Date.now()
         return {
           ...a,
-          expiresAt: new Date(baseTs + 24 * HOUR_MS).toISOString(),
+          expiresAt: new Date(baseTs + safeMinutes * 60_000).toISOString(),
+        }
+      }),
+    )
+  }, [])
+
+  const reEnforceAction = useCallback((actionId) => {
+    const ts = new Date().toISOString()
+    const nowTs = Date.now()
+    setActions((prev) =>
+      prev.map((a) => {
+        if (a.id !== actionId || a.status !== 'REVERSED') {
+          return a
+        }
+        const currentExpiry = a.expiresAt ? new Date(a.expiresAt).getTime() : null
+        const nextExpiry =
+          currentExpiry && currentExpiry > nowTs
+            ? a.expiresAt
+            : a.expiresAt
+              ? new Date(nowTs + 24 * HOUR_MS).toISOString()
+              : null
+
+        return {
+          ...a,
+          status: 'ACTIVE',
+          enforcedAt: ts,
+          expiresAt: nextExpiry,
+          reversedAt: null,
+          reversedBy: null,
+          reversalReason: null,
         }
       }),
     )
@@ -243,6 +273,7 @@ export function ResponseActionsProvider({ children }) {
       reverseAction,
       reverseActionsForAlert,
       extendAction,
+      reEnforceAction,
       appendRemediationLog,
     }),
     [
@@ -255,6 +286,7 @@ export function ResponseActionsProvider({ children }) {
       reverseAction,
       reverseActionsForAlert,
       extendAction,
+      reEnforceAction,
       appendRemediationLog,
     ],
   )

@@ -8,6 +8,7 @@ const levelClass = {
   CLEAN: 'border-tron-cyan-dim text-tron-cyan-dim',
   SUSPICIOUS: 'border-tron-amber text-tron-amber',
   COMPROMISED: 'border-tron-red text-tron-red',
+  CONTAINED: 'border-tron-cyan text-tron-cyan',
 }
 
 const sensorClass = {
@@ -18,13 +19,19 @@ const sensorClass = {
 
 export default function Devices() {
   const { devices } = useDevices()
-  const { deviceActiveCounts } = useResponseActions()
+  const { actions, deviceActiveCounts } = useResponseActions()
 
   return (
     <div className="space-y-4">
       <h2 className="font-display text-2xl text-tron-text-bright">DEVICE INVENTORY</h2>
       <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
         {devices.map((d) => (
+          (() => {
+            const contained = actions.some(
+              (a) => a.targetDeviceId === d.id && a.actionType.includes('QUARANTINE') && a.status === 'ACTIVE',
+            )
+            const effectiveThreat = contained ? 'CONTAINED' : d.threatLevel
+            return (
           <HUDCard key={d.id}>
             <div className="flex items-start justify-between">
               <p className="font-display text-lg text-tron-text-bright">{d.name}</p>
@@ -42,8 +49,8 @@ export default function Devices() {
               <MiniSparkline values={d.miniFusion} />
             </div>
             <div className="mt-3 flex items-center justify-between">
-              <span className={`border px-2 py-1 text-[10px] uppercase tracking-[0.15em] ${levelClass[d.threatLevel]}`}>
-                {d.threatLevel}
+              <span className={`border px-2 py-1 text-[10px] uppercase tracking-[0.15em] ${levelClass[effectiveThreat]}`}>
+                {effectiveThreat}
               </span>
               {deviceActiveCounts[d.id] ? (
                 <Link
@@ -58,6 +65,8 @@ export default function Devices() {
               </Link>
             </div>
           </HUDCard>
+            )
+          })()
         ))}
       </div>
     </div>
