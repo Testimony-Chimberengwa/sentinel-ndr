@@ -174,6 +174,36 @@ export function ResponseActionsProvider({ children }) {
     }
   }, [actions, appendRemediationLog])
 
+  const reverseActionsForAlert = useCallback(
+    ({ alertId, reason, reversedBy = 'analyst@sentinel.local' }) => {
+      const ts = new Date().toISOString()
+      const affected = actions.filter((a) => a.triggeredByAlert === alertId && a.status === 'ACTIVE')
+
+      setActions((prev) =>
+        prev.map((a) =>
+          a.triggeredByAlert === alertId && a.status === 'ACTIVE'
+            ? {
+                ...a,
+                status: 'REVERSED',
+                reversedAt: ts,
+                reversedBy,
+                reversalReason: reason,
+              }
+            : a,
+        ),
+      )
+
+      affected.forEach((source) => {
+        const stamp = ts.replace('T', ' ').slice(0, 16)
+        appendRemediationLog(
+          alertId,
+          `[${stamp}] SENTINEL > Reversal executed: ${source.actionType} on ${source.targetDeviceName}. Reason: ${reason}`,
+        )
+      })
+    },
+    [actions, appendRemediationLog],
+  )
+
   const extendAction = useCallback((actionId) => {
     setActions((prev) =>
       prev.map((a) => {
@@ -211,6 +241,7 @@ export function ResponseActionsProvider({ children }) {
       queuePendingAction,
       activatePendingAction,
       reverseAction,
+      reverseActionsForAlert,
       extendAction,
       appendRemediationLog,
     }),
@@ -222,6 +253,7 @@ export function ResponseActionsProvider({ children }) {
       queuePendingAction,
       activatePendingAction,
       reverseAction,
+      reverseActionsForAlert,
       extendAction,
       appendRemediationLog,
     ],

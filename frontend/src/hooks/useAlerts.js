@@ -1,6 +1,11 @@
-import { useMemo } from 'react'
-import { alerts, getAlertById } from '../data/mockData'
+import { useContext, useMemo } from 'react'
+import { AlertsContext } from '../context/AlertsContext'
 
 export function useAlerts() {
-  return useMemo(() => ({ alerts, getAlertById }), [])
+  const ctx = useContext(AlertsContext)
+  if (!ctx) {
+    throw new Error('useAlerts must be used within AlertsProvider')
+  }
+
+  return useMemo(() => ctx, [ctx])
 }

@@ -15,7 +15,7 @@ export default function Alerts() {
     attack: 'ALL',
   })
 
-  const unreviewed = alerts.filter((a) => a.status === 'OPEN').length
+  const unreviewed = alerts.filter((a) => !a.acknowledged).length
 
   const counts = {
     CRITICAL: alerts.filter((a) => a.severity === 'CRITICAL').length,
@@ -29,7 +29,7 @@ export default function Alerts() {
       alerts.filter((a) => {
         if (filters.device !== 'ALL' && a.deviceId !== filters.device) return false
         if (filters.severity !== 'ALL' && a.severity !== filters.severity) return false
-        if (filters.status !== 'ALL' && a.status !== filters.status) return false
+        if (filters.status !== 'ALL' && a.investigationStatus !== filters.status) return false
         if (filters.attack !== 'ALL' && a.attackType !== filters.attack) return false
         return true
       }),
@@ -69,7 +69,7 @@ export default function Alerts() {
           </select>
           <input className="hud-input" type="text" placeholder="Date range (mock)" />
           <select onChange={update('status')} value={filters.status} className="hud-input">
-            {['ALL', 'OPEN', 'INVESTIGATING', 'RESOLVED', 'FALSE POSITIVE'].map((v) => <option key={v}>{v}</option>)}
+            {['ALL', 'OPEN', 'INVESTIGATING', 'CONCLUDED', 'CLOSED'].map((v) => <option key={v}>{v}</option>)}
           </select>
         </div>
       </HUDCard>

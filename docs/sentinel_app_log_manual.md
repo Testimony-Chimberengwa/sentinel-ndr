@@ -32,6 +32,14 @@ Use this file as the source of truth when changing the app:
 - Added a new `frontend/src/pages/Models.jsx` route at `/models` for HDT detection engine health, layer scores, attack profile performance, baseline health, and model breach tracking.
 - Added shared model-health UI patterns for layer toggles, device retrain actions, breach acknowledgements, and model-defeat tracking.
 
+- Upgraded the `/threats` page into a split-panel investigation workspace in `frontend/src/pages/Threats.jsx` with an alert feed, selected alert workspace, timeline feed, response drawer, and pattern-of-life heatmap.
+- Added shared alert investigation state in `frontend/src/context/AlertsContext.jsx` and wired it through `frontend/src/main.jsx` so alerts now support OPEN, INVESTIGATING, CONCLUDED, and CLOSED workflow states.
+- Updated `frontend/src/pages/Alerts.jsx`, `frontend/src/components/alerts/AlertCard.jsx`, and `frontend/src/pages/AlertDetail.jsx` to surface investigation status, notes, acknowledge/investigate controls, and conclusion actions.
+- Extended `frontend/src/context/ResponseActionsContext.jsx` so false-positive conclusions can reverse all actions triggered by a given alert.
+- Added `frontend/src/components/alerts/AlertInvestigationPanel.jsx` and `frontend/src/components/charts/PatternOfLifeHeatmap.jsx` for reusable investigation detail and heatmap display.
+- Updated `frontend/src/data/mockData.js` with richer event metadata and a 02:00-04:00 daily pattern for VM-TEST-EXFIL.
+- Built and validated the frontend after the changes.
+
 ### 2026-05-13
 
 - Added GX-inspired visual exploration to the frontend, then reverted it back toward the original Tron style after review.

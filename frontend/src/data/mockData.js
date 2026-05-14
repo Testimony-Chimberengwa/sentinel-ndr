@@ -344,7 +344,10 @@ export const getConnectionLog = (deviceId) => {
 
   return Array.from({ length: 14 }).map((_, i) => ({
     id: `${deviceId}-${i}`,
-    timestamp: `2026-05-${String(12 - (i % 6)).padStart(2, '0')} ${String((i * 4) % 24).padStart(2, '0')}:12`,
+    timestamp: suspicious
+      ? `2026-05-${String(12 - Math.floor(i / 3)).padStart(2, '0')} ${String([2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3][i]).padStart(2, '0')}:12`
+      : `2026-05-${String(12 - (i % 6)).padStart(2, '0')} ${String((i * 4) % 24).padStart(2, '0')}:12`,
+    srcIp: suspicious ? (deviceId === 'vm-test-exfil' ? '192.168.137.99' : '192.168.137.50') : '192.168.137.12',
     dstIp: suspicious && i % 3 === 0 ? '41.215.88.34' : `192.168.137.${20 + i}`,
     port: suspicious ? [53, 80, 443, 8080, 445][i % 5] : [53, 443, 445][i % 3],
     protocol: i % 2 === 0 ? 'TCP' : 'UDP',
@@ -352,7 +355,28 @@ export const getConnectionLog = (deviceId) => {
     duration: `${8 + i}s`,
     anomaly: +(suspicious ? 0.33 + i * 0.03 : 0.08 + i * 0.01).toFixed(2),
     flag: suspicious && i % 3 === 0 ? 'FLAGGED' : 'NORMAL',
+    userAgent: suspicious ? 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) SentinelProbe/1.4' : 'curl/8.1.2',
+    uri: suspicious ? ['/sync', '/api/status', '/feed', '/telemetry', '/health'][i % 5] : '/index',
+    responseCode: suspicious && i % 3 === 0 ? 206 : 200,
   }))
+}
+
+export const getPatternOfLifeHeatmap = (deviceId) => {
+  const suspicious = deviceId === 'vm-test-exfil'
+
+  return Array.from({ length: 7 }).map((_, dayIndex) => {
+    const row = Array.from({ length: 24 }).map((__, hour) => {
+      const peak = suspicious
+        ? Math.exp(-((hour - 3) ** 2) / 4) * (0.9 - dayIndex * 0.05) + (hour >= 2 && hour <= 4 ? 0.22 : 0.03)
+        : 0.06 + Math.sin((hour + dayIndex) / 3) * 0.04 + dayIndex * 0.01
+      return {
+        day: `D-${6 - dayIndex}`,
+        hour,
+        value: +Math.max(0, Math.min(1, peak)).toFixed(2),
+      }
+    })
+    return row
+  })
 }
 
 export const getRemediationActions = (attackType) => {
