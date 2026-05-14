@@ -7,6 +7,7 @@ import Baseline from './pages/Baseline'
 import Dashboard from './pages/Dashboard'
 import DeviceDrillDown from './pages/DeviceDrillDown'
 import Devices from './pages/Devices'
+import Models from './pages/Models'
 import ResponseActions from './pages/ResponseActions'
 import Settings from './pages/Settings'
 import Threats from './pages/Threats'
@@ -28,6 +29,7 @@ function App() {
             <Route path="/response-actions" element={<ResponseActions />} />
             <Route path="/threats" element={<Threats />} />
             <Route path="/baseline" element={<Baseline />} />
+            <Route path="/models" element={<Models />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

@@ -27,6 +27,11 @@ Use this file as the source of truth when changing the app:
 
 ## Feature Log
 
+### 2026-05-14
+
+- Added a new `frontend/src/pages/Models.jsx` route at `/models` for HDT detection engine health, layer scores, attack profile performance, baseline health, and model breach tracking.
+- Added shared model-health UI patterns for layer toggles, device retrain actions, breach acknowledgements, and model-defeat tracking.
+
 ### 2026-05-13
 
 - Added GX-inspired visual exploration to the frontend, then reverted it back toward the original Tron style after review.
